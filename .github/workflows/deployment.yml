@@ -64,7 +64,7 @@ jobs:
 
       - name: Werf dismiss
         uses: werf/actions/dismiss@v1.2
-        if: ${{ github.event_name == 'pull_request' && ((github.event.action == 'closed' && env.IS_LABELED_PR == 'true') || (github.event.action == 'unlabeled' && !env.IS_LABELED_PR)) }}
+        if: ${{ github.event_name == 'pull_request' && ((github.event.action == 'closed' && env.IS_LABELED_PR == 'true') || (github.event.action == 'unlabeled' && env.IS_LABELED_PR == 'false')) }}
         with:
           kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
           env: ${{ env.WERF_ENV }}  
