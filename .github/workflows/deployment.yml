@@ -14,10 +14,6 @@ on:
         domain:
           description: Hosting domain, e.g. example.com
           type: string
-        branches:
-          description: Branches, converged by push even, separated by comma (main by default)
-          type: string
-          default: main
         label:
           description: Pull request label to converge (review by default)
           type: string
@@ -38,6 +34,7 @@ env:
   WERF_SET_DOMAIN: env.DOMAIN=${{ inputs.domain }}
   WERF_REPO: ${{ inputs.registry }}/${{ github.repository }}
   WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
+  IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
 
 jobs:
 
@@ -57,24 +54,16 @@ jobs:
           username: ${{ secrets.REGISTRY_USERNAME || 'NULL' }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Werf converge push
+      - name: Werf converge
         uses: werf/actions/converge@v1.2
-        if: ${{ github.event_name == 'push' && contains( inputs.branches, env.WERF_ENV)  }}
-        with:
-          kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
-          env: ${{ env.WERF_ENV }}
-
-      - name: Werf converge pull request
-        uses: werf/actions/converge@v1.2
-        if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
+        if: ${{ github.event_name == 'push' || env.IS_LABELED_PR && github.event.action != 'closed' }}
         with:
           kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
           env: ${{ env.WERF_ENV }}
 
       - name: Werf dismiss
         uses: werf/actions/dismiss@v1.2
-        if: ${{ github.event_name == 'pull_request'  && !contains( inputs.branches, env.WERF_ENV) && (github.event.action == 'closed' || !contains( github.event.pull_request.labels.*.name, inputs.label )) }}
+        if: ${{ github.event_name == 'pull_request' && ((github.event.action == 'closed' && env.IS_LABELED_PR) || (github.event.action == 'unlabeled' && !env.IS_LABELED_PR)) }}
         with:
           kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
-          env: ${{ env.WERF_ENV }}
-
+          env: ${{ env.WERF_ENV }}  
