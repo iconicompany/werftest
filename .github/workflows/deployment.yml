@@ -53,8 +53,6 @@ jobs:
           registry: ${{ inputs.registry }}
           username: ${{ secrets.REGISTRY_USERNAME || 'NULL' }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      - name: Show env
-        run: env
       - name: Werf converge
         uses: werf/actions/converge@v1.2
         if: ${{ github.event_name == 'push' || env.IS_LABELED_PR == 'true' && github.event.action != 'closed' }}
