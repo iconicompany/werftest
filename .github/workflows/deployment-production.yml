@@ -1,0 +1,15 @@
+name: Production Deployment
+on:
+  push:
+    tags: ['*']
+
+jobs:
+
+  call-converge:
+    uses: ./.github/workflows/deployment.yml
+    secrets: inherit
+    with:
+      registry: registry.gitlab.com
+      context: production
+      environment: production
+      domain: iconicompany.ru

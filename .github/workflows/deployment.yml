@@ -1,0 +1,80 @@
+name: Werf Deployment
+on:
+    workflow_call:
+      inputs:
+        registry:
+          description: Container registry, e.g. registry.gitlab.com.
+          type: string
+        context:
+          description: Deployment kubernetes context (production, staging, testing, etc)
+          type: string
+        environment:
+          description: Deployment environment (production, branch name, pull request number, etc). Default value is branch/tag name "github.head_ref || github.ref_name"
+          type: string
+        domain:
+          description: Hosting domain, e.g. example.com
+          type: string
+        branches:
+          description: Branches, converged by push even, separated by comma (main by default)
+          type: string
+          default: main
+        label:
+          description: Pull request label to converge (review by default)
+          type: string
+          default: review
+      secrets:
+        REGISTRY_USERNAME:
+        REGISTRY_PASSWORD:
+        WERF_SECRET_KEY:
+        KUBE_CONFIG:
+
+concurrency:
+  group: ${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  WERF_ENV: ${{ inputs.environment || github.head_ref || github.ref_name }} 
+  WERF_KUBE_CONTEXT: ${{ inputs.context }}
+  WERF_SET_DOMAIN: env.DOMAIN=${{ inputs.domain }}
+  WERF_REPO: ${{ inputs.registry }}/${{ github.repository }}
+  WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
+
+jobs:
+
+  converge:
+    name: Converge
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Login to Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ inputs.registry }}
+          username: ${{ secrets.REGISTRY_USERNAME || 'NULL' }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Werf converge push
+        uses: werf/actions/converge@v1.2
+        if: ${{ github.event_name == 'push' && contains( inputs.branches, env.WERF_ENV)  }}
+        with:
+          kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
+          env: ${{ env.WERF_ENV }}
+
+      - name: Werf converge pull request
+        uses: werf/actions/converge@v1.2
+        if: ${{ github.event_name == 'pull_request' && github.event.action != 'closed' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
+        with:
+          kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
+          env: ${{ env.WERF_ENV }}
+
+      - name: Werf dismiss
+        uses: werf/actions/dismiss@v1.2
+        if: ${{ github.event_name == 'pull_request'  && !contains( inputs.branches, env.WERF_ENV) && (github.event.action == 'closed' || !contains( github.event.pull_request.labels.*.name, inputs.label )) }}
+        with:
+          kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
+          env: ${{ env.WERF_ENV }}
+
