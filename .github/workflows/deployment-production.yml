@@ -5,7 +5,7 @@ on:
 
 jobs:
 
-  call-converge:
+  call-deployment:
     uses: ./.github/workflows/deployment.yml
     secrets: inherit
     with:
