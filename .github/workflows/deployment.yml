@@ -1,4 +1,4 @@
-name: Werf Deployment
+name: Deployment
 on:
     workflow_call:
       inputs:
