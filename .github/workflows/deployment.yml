@@ -11,8 +11,8 @@ on:
         environment:
           description: Deployment environment (production, branch name, pull request number, etc). Default value is branch/tag name "github.head_ref || github.ref_name"
           type: string
-        domain:
-          description: Hosting domain, e.g. example.com
+        setenv:
+          description: Some env variable, e.g. env.DOMAIN=example.com
           type: string
         label:
           description: Pull request label to converge (review by default)
@@ -31,7 +31,7 @@ concurrency:
 env:
   WERF_ENV: ${{ inputs.environment || github.head_ref || github.ref_name }} 
   WERF_KUBE_CONTEXT: ${{ inputs.context }}
-  WERF_SET_DOMAIN: env.DOMAIN=${{ inputs.domain }}
+  WERF_SET_ENV: ${{ inputs.setenv }}
   WERF_REPO: ${{ inputs.registry }}/${{ github.repository }}
   WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
   IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}

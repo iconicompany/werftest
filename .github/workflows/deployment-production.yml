@@ -12,4 +12,4 @@ jobs:
       registry: registry.gitlab.com
       context: production
       environment: production
-      domain: iconicompany.ru
+      setenv: env.DOMAIN=iconicompany.ru
