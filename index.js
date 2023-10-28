@@ -5,7 +5,7 @@ const port = process.env.HTTP_PORT || 3000;
 
 const handler = createRouter()
   .get('/werftest/heartbeat', (req, res) => {
-    res.end('OK');
+    res.end('OK2');
   }).handler();
 
 http.createServer(handler).listen(port);
