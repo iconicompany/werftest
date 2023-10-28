@@ -10,4 +10,4 @@ jobs:
       registry: registry.gitlab.com
       context: production
       environment: production
-      setenv: env.DOMAIN=iconicompany.ru
+      setenv: env.DOMAIN=${{ contains(github.ref_name, 'alpha' && 'alpha.')}} 'iconicompany.ru
