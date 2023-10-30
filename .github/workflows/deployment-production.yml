@@ -9,5 +9,5 @@ jobs:
     with:
       registry: registry.gitlab.com/${{ github.repository }}
       context: production
-      environment: production
+      env: production
       setenv: env.DOMAIN=iconicompany.ru
