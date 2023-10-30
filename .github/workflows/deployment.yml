@@ -3,7 +3,7 @@ on:
     workflow_call:
       inputs:
         registry:
-          description: Container registry, e.g. registry.gitlab.com.
+          description: Container registry, e.g. registry.gitlab.com/owner/repo.
           type: string
         context:
           description: Deployment kubernetes context (production, staging, testing, etc)
@@ -32,7 +32,7 @@ env:
   WERF_ENV: ${{ inputs.environment || github.head_ref || github.ref_name }} 
   WERF_KUBE_CONTEXT: ${{ inputs.context }}
   WERF_SET_ENV: ${{ inputs.setenv }}
-  WERF_REPO: ${{ inputs.registry }}/${{ github.repository }}
+  WERF_REPO: ${{ inputs.registry }}
   WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
   IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
 
