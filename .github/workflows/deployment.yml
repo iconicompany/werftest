@@ -23,8 +23,6 @@ on:
           description: Container registry login. If not set, github.actor is used
         REGISTRY_PASSWORD:
           description: Container registry password.  If not set, secrets.GITHUB_TOKEN is used
-        GITHUB_TOKEN:
-          description: ghcr password (set by guthub actions) 
         WERF_SECRET_KEY:
           description: Key for secret files/values. Required if secret files/values used in templates.
         KUBE_CONFIG:
