@@ -2,6 +2,8 @@ name: Testing Deployment
 on:
   push:
     branches: ['main','sandbox']
+  pull_request:
+    branches: [ main, master ]
 jobs:
   call-deployment:
     uses: ./.github/workflows/deployment.yml
