@@ -31,7 +31,7 @@ on:
 
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
-  cancel-in-progress: true
+  cancel-in-progress:  false
 
 env:
   WERF_ENV: ${{ inputs.env || github.head_ref || github.ref_name }} 
