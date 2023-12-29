@@ -6,12 +6,12 @@ on:
         description: Werf env (production, branch name, pull request number, etc). Default value is branch/tag name "github.head_ref || github.ref_name"
         type: string
       setenv:
-        description: WERFTEST_URL.
+        description: DOMAIN.
         type: string
 
 
 env:
-  WERFTEST_URL: ${{ inputs.setenv }}
+  DOMAIN: ${{ inputs.setenv }}
 
 jobs:
   test:
