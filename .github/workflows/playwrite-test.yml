@@ -2,16 +2,13 @@ name: Playwright
 on:
   workflow_call:
     inputs:
-      env:
-        description: Werf env (production, branch name, pull request number, etc). Default value is branch/tag name "github.head_ref || github.ref_name"
-        type: string
-      setenv:
+      domain:
         description: DOMAIN.
         type: string
 
 
 env:
-  DOMAIN: ${{ inputs.setenv }}
+  DOMAIN: ${{ inputs.domain }}
 
 jobs:
   test:
