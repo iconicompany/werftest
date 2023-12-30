@@ -20,6 +20,6 @@ jobs:
       setenv: env.DOMAIN=${{ github.head_ref || github.ref_name }}.${{ github.repository_owner }}.icncd.ru
   call-test:
     needs: call-deployment
-    uses: ./.github/workflows/playwrite-test.yml
+    uses: ./.github/workflows/playwright-test.yml
     with:
       domain: ${{ github.head_ref || github.ref_name }}.${{ github.repository_owner }}.icncd.ru
