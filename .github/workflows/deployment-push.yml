@@ -1,8 +1,6 @@
-name: Testing Deployment
+name: Push Deployment
 on:
   push:
-    branches: ['main','sandbox']
-  pull_request:
     branches: ['main','sandbox']
 
 concurrency:
