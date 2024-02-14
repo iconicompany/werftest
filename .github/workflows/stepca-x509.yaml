@@ -37,7 +37,7 @@ jobs:
           step ca bootstrap --ca-url ${{ inputs.CA_URL}} --fingerprint ${{ inputs.CA_FINGERPRINT }}
       - name: Get a certificate
         run: |
-          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$OIDC_CLIENT_ID" | jq -r .value)
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=${{ inputs.OIDC_CLIENT_ID }}" | jq -r .value)
           curl -sLO https://token.actions.githubusercontent.com/.well-known/jwks
           echo $TOKEN | step crypto jwt verify \
             --jwks jwks \
