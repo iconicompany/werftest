@@ -22,20 +22,32 @@ on:
           description: Certificate lifetime 
           type: string
           default: 1h
+      # Map the workflow outputs to job outputs
+      outputs:
+        CERTIFICATE:
+          description: "Generated certificate"
+          value: ${{ jobs.gencert.outputs.CERTIFICATE }}
+        PRIVATEKEY:
+          description: "Private key"
+          value: ${{ jobs.gencert.outputs.PRIVATEKEY }}
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
 
 jobs:
-  OIDC-to-X509:
+  gencert:
     runs-on: ubuntu-latest
+    # Map the job outputs to step outputs
+    outputs:
+      CERTIFICATE: ${{ steps.certificate.outputs.CERTIFICATE }}
+      PRIVATEKEY: ${{ steps.certificate.outputs.PRIVATEKEY }}
     steps:
       - name: CA bootstrap
         run: |
           curl -LO https://dl.smallstep.com/cli/docs-cli-install/latest/step-cli_amd64.deb
           sudo dpkg -i step-cli_amd64.deb
           step ca bootstrap --ca-url ${{ inputs.CA_URL}} --fingerprint ${{ inputs.CA_FINGERPRINT }}
-      - name: Get a certificate
+      - name: certificate
         run: |
           TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=${{ inputs.OIDC_CLIENT_ID }}" | jq -r .value)
           curl -sLO https://token.actions.githubusercontent.com/.well-known/jwks
@@ -49,3 +61,10 @@ jobs:
             --token "$TOKEN" \
             --not-after ${{ inputs.NOT_AFTER }}
           step certificate inspect github.crt
+          echo 'CERTIFICATE<<EOF' >> $GITHUB_OUTPUT
+          cat github.crt >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+          echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
+          cat github.key >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+

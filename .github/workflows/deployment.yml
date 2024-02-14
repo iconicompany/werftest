@@ -42,13 +42,14 @@ env:
   IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
 
 jobs:
-  call-stepca:
-    uses: ./.github/workflows/stepca-x509.yaml
+  stepcacert:
+    uses: ./.github/workflows/stepcacert.yaml
   deployment:
-    needs: call-stepca
+    needs: stepcacert
     name: Deployment
     runs-on: ubuntu-latest
     steps:
+      - run: echo ${{ needs.stepcacert.outputs.CERTIFICATE }}
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -70,4 +71,4 @@ jobs:
         if: ${{ github.event_name == 'pull_request' && ((github.event.action == 'closed' && env.IS_LABELED_PR == 'true') || (github.event.action == 'unlabeled' && env.IS_LABELED_PR == 'false')) }}
         with:
           kube-config-base64-data: ${{ secrets.KUBE_CONFIG }}
-          env: ${{ env.WERF_ENV }}  
+          env: ${{ env.WERF_ENV }}
