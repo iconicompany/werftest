@@ -47,7 +47,8 @@ jobs:
           curl -LO https://dl.smallstep.com/cli/docs-cli-install/latest/step-cli_amd64.deb
           sudo dpkg -i step-cli_amd64.deb
           step ca bootstrap --ca-url ${{ inputs.CA_URL}} --fingerprint ${{ inputs.CA_FINGERPRINT }}
-      - name: certificate
+      - name: Issue certificate
+        id: certificate
         run: |
           TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=${{ inputs.OIDC_CLIENT_ID }}" | jq -r .value)
           curl -sLO https://token.actions.githubusercontent.com/.well-known/jwks
