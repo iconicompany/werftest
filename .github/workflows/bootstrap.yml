@@ -1,4 +1,4 @@
-name: Bootstrap x509 Client Certificate And KUBECONF
+name: Bootstrap KUBE_CONFIG from StepCA
 on:
     workflow_call:
       inputs:
@@ -31,15 +31,16 @@ on:
         CERTIFICATEAUTHORITY:
           description: "Certificate authority"
           value: ${{ jobs.bootstrapjob.outputs.CERTIFICATEAUTHORITY }}
-        CERTIFICATE:
-          description: "Generated certificate"
-          value: ${{ jobs.bootstrapjob.outputs.CERTIFICATE }}
-        PRIVATEKEY:
-          description: "Private key"
-          value: ${{ jobs.bootstrapjob.outputs.PRIVATEKEY }}
+        #CERTIFICATE:
+        #  description: "Generated certificate"
+        #  value: ${{ jobs.bootstrapjob.outputs.CERTIFICATE }}
+        #PRIVATEKEY:
+        #  description: "Private key"
+        #  value: ${{ jobs.bootstrapjob.outputs.PRIVATEKEY }}
         KUBE_CONFIG:
           description: "KUBECONFIG in BASE64"
           value: ${{ jobs.bootstrapjob.outputs.KUBE_CONFIG }}
+
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
@@ -50,8 +51,8 @@ jobs:
     # Map the job outputs to step outputs
     outputs:
       CERTIFICATEAUTHORITY: ${{ steps.bootstrap.outputs.CERTIFICATEAUTHORITY }}
-      CERTIFICATE: ${{ steps.certificate.outputs.CERTIFICATE }}
-      PRIVATEKEY: ${{ steps.certificate.outputs.PRIVATEKEY }}
+      #CERTIFICATE: ${{ steps.certificate.outputs.CERTIFICATE }}
+      #PRIVATEKEY: ${{ steps.certificate.outputs.PRIVATEKEY }}
       KUBE_CONFIG: ${{ steps.kubeconfig.outputs.KUBE_CONFIG }}
     steps:
       - name: CA bootstrap
@@ -79,14 +80,15 @@ jobs:
             --token "$TOKEN" \
             --not-after ${{ inputs.NOT_AFTER }}
           step certificate inspect github.crt
-          echo 'CERTIFICATE<<EOF' >> $GITHUB_OUTPUT
-          cat github.crt >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
-          echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
-          cat github.key >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          #echo 'CERTIFICATE<<EOF' >> $GITHUB_OUTPUT
+          #cat github.crt >> $GITHUB_OUTPUT
+          #echo 'EOF' >> $GITHUB_OUTPUT
+          #echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
+          #cat github.key >> $GITHUB_OUTPUT
+          #echo 'EOF' >> $GITHUB_OUTPUT
           echo "CERTIFICATE_BASE64=$(cat github.crt | base64 -w0)" >> $GITHUB_OUTPUT
           echo "PRIVATEKEY_BASE64=$(cat github.key | base64 -w0)" >> $GITHUB_OUTPUT
+          rm github.key
       - name: Generate KUBE_CONFIG
         id: kubeconfig
         run: |
