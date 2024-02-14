@@ -53,9 +53,8 @@ jobs:
           sudo dpkg -i step-cli_amd64.deb
           step ca bootstrap --ca-url ${{ inputs.CA_URL}} --fingerprint ${{ inputs.CA_FINGERPRINT }}
           echo 'CERTIFICATEAUTHORITY<<EOF' >> $GITHUB_OUTPUT
-          cat .step/certs/root_ca.crt >> $GITHUB_OUTPUT
+          cat ${$GITHUB_WORKSPACE}.step/certs/root_ca.crt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-
       - name: Issue certificate
         id: certificate
         run: |
