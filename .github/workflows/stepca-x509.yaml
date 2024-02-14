@@ -1,0 +1,51 @@
+name: StepCA x509 Certificate
+on:
+    workflow_call:
+      inputs:
+        CA_URL:
+          description: Step CA URL, e.g. https://ca.iconicompany.com:7443
+          type: string
+          default: https://ca.iconicompany.com:7443
+        CA_FINGERPRINT:
+          description: Root CA fingerprint
+          type: string
+          default: 8cbfb715df6166dca2bf680fa0418a3ba42344be6abb0a4b5a0d7800ad835c27
+        OIDC_CLIENT_ID:
+          description: OIDC Client ID, e.g. api://SmallstepCAProvisioner
+          type: string
+          default: api://SmallstepCAProvisioner
+        PROVISIONER:
+          description: OIDC Provisioner
+          type: string
+          default: github-actions
+        NOT_AFTER:
+          description: Certificate lifetime 
+          type: string
+          default: 1h
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+
+jobs:
+  OIDC-to-X509:
+    runs-on: ubuntu-latest
+    steps:
+      - name: CA bootstrap
+        run: |
+          curl -LO https://dl.smallstep.com/cli/docs-cli-install/latest/step-cli_amd64.deb
+          sudo dpkg -i step-cli_amd64.deb
+          step ca bootstrap --ca-url $CA_URL --fingerprint $CA_FINGERPRINT
+      - name: Get a certificate
+        run: |
+          TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=$OIDC_CLIENT_ID" | jq -r .value)
+          curl -sLO https://token.actions.githubusercontent.com/.well-known/jwks
+          echo $TOKEN | step crypto jwt verify \
+            --jwks jwks \
+            --aud $OIDC_CLIENT_ID \
+            --iss "https://token.actions.githubusercontent.com"
+          SUBSCRIBER=$(echo $TOKEN | step crypto jwt inspect --insecure | jq -r .payload.sub)
+          step ca certificate $SUBSCRIBER github.crt github.key \
+            --provisioner $PROVISIONER \
+            --token "$TOKEN" \
+            --not-after $NOT_AFTER
+          step certificate inspect github.crt
