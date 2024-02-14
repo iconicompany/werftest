@@ -63,7 +63,7 @@ jobs:
           echo 'CERTIFICATEAUTHORITY<<EOF' >> $GITHUB_OUTPUT
           cat ${HOME}/.step/certs/root_ca.crt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-          echo "CERTIFICATEAUTHORITY_BASE64=$(cat ${HOME}/.step/certs/root_ca.crt | base64)" >> $GITHUB_ENV
+          echo "CERTIFICATEAUTHORITY_BASE64=$(cat ${HOME}/.step/certs/root_ca.crt | base64)" >> $GITHUB_OUTPUT
       - name: Issue certificate
         id: certificate
         run: |
@@ -85,8 +85,8 @@ jobs:
           echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
           cat github.key >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-          echo "CERTIFICATE_BASE64=$(cat github.crt | base64)" >> $GITHUB_ENV
-          echo "PRIVATEKEY_BASE64=$(cat github.key | base64)" >> $GITHUB_ENV
+          echo "CERTIFICATE_BASE64=$(cat github.crt | base64)" >> $GITHUB_OUTPUT
+          echo "PRIVATEKEY_BASE64=$(cat github.key | base64)" >> $GITHUB_OUTPUT
       - name: Generate KUBE_CONFIG
         id: kubeconfig
         run: |
@@ -117,9 +117,9 @@ jobs:
           echo 'EOF' >> $GITHUB_OUTPUT          
         env:
           CLUSTER_URL: ${{ inputs.CLUSTER_URL }}
-          CERTIFICATEAUTHORITY_BASE64: $CERTIFICATEAUTHORITY_BASE64
-          CERTIFICATE_BASE64: $CERTIFICATE_BASE64
-          PRIVATEKEY_BASE64: $PRIVATEKEY_BASE64
+          CERTIFICATEAUTHORITY_BASE64: ${{ steps.bootstrap.outputs.CERTIFICATEAUTHORITY_BASE64 }}
+          CERTIFICATE_BASE64: ${{ steps.certificate.outputs.CERTIFICATE_BASE64 }}
+          PRIVATEKEY_BASE64: ${{ steps.certificate.outputs.PRIVATEKEY_BASE64 }}
     
   
   
