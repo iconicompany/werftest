@@ -30,22 +30,22 @@ on:
       outputs:
         CERTIFICATEAUTHORITY:
           description: "Certificate authority"
-          value: ${{ jobs.bootjob.outputs.CERTIFICATEAUTHORITY }}
+          value: ${{ jobs.bootstrapjob.outputs.CERTIFICATEAUTHORITY }}
         CERTIFICATE:
           description: "Generated certificate"
-          value: ${{ jobs.bootjob.outputs.CERTIFICATE }}
+          value: ${{ jobs.bootstrapjob.outputs.CERTIFICATE }}
         PRIVATEKEY:
           description: "Private key"
-          value: ${{ jobs.bootjob.outputs.PRIVATEKEY }}
+          value: ${{ jobs.bootstrapjob.outputs.PRIVATEKEY }}
         KUBE_CONFIG:
           description: "KUBECONFIG in BASE64"
-          value: ${{ jobs.bootjob.outputs.KUBE_CONFIG }}
+          value: ${{ jobs.bootstrapjob.outputs.KUBE_CONFIG }}
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
 
 jobs:
-  bootjob:
+  bootstrapjob:
     runs-on: ubuntu-latest
     # Map the job outputs to step outputs
     outputs:
@@ -63,7 +63,7 @@ jobs:
           echo 'CERTIFICATEAUTHORITY<<EOF' >> $GITHUB_OUTPUT
           cat ${HOME}/.step/certs/root_ca.crt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-          echo "CERTIFICATEAUTHORITY_BASE64=$(cat ${HOME}/.step/certs/root_ca.crt | base64)" >> $GITHUB_OUTPUT
+          echo "CERTIFICATEAUTHORITY_BASE64=$(cat ${HOME}/.step/certs/root_ca.crt | base64 -w0)" >> $GITHUB_OUTPUT
       - name: Issue certificate
         id: certificate
         run: |
@@ -85,8 +85,8 @@ jobs:
           echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
           cat github.key >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-          echo "CERTIFICATE_BASE64=$(cat github.crt | base64)" >> $GITHUB_OUTPUT
-          echo "PRIVATEKEY_BASE64=$(cat github.key | base64)" >> $GITHUB_OUTPUT
+          echo "CERTIFICATE_BASE64=$(cat github.crt | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "PRIVATEKEY_BASE64=$(cat github.key | base64 -w0)" >> $GITHUB_OUTPUT
       - name: Generate KUBE_CONFIG
         id: kubeconfig
         run: |
