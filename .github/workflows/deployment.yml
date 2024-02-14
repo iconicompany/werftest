@@ -41,17 +41,14 @@ env:
   IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
 
 jobs:
-  stepcacert:
-    uses: ./.github/workflows/stepcacert.yaml
-  kubeconf:
-    needs: stepcacert
-    uses: ./.github/workflows/kubeconfig.yaml
+  bootstrap:
+    uses: ./.github/workflows/bootstrap.yml
   deployment:
-    needs: kubeconf
+    needs: bootstrap
     name: Deployment
     runs-on: ubuntu-latest
     steps:
-      - run: echo "${{ needs.kubeconf.outputs.KUBE_CONFIG }}"
+      - run: echo "${{ needs.bootstrap.outputs.KUBE_CONFIG }}"
       - name: Checkout code
         uses: actions/checkout@v3
         with:

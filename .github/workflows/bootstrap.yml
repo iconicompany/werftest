@@ -1,7 +1,11 @@
-name: StepCA x509 Certificate
+name: Bootstrap x509 Client Certificate And KUBECONF
 on:
     workflow_call:
       inputs:
+        CLUSTER_URL:
+          description: Cluser URL, e.g. https://kube01.icncd.ru:6443
+          type: string
+          default: https://kube01.icncd.ru:6443
         CA_URL:
           description: Step CA URL, e.g. https://ca.iconicompany.com:7443
           type: string
@@ -26,25 +30,29 @@ on:
       outputs:
         CERTIFICATEAUTHORITY:
           description: "Certificate authority"
-          value: ${{ jobs.gencert.outputs.CERTIFICATEAUTHORITY }}
+          value: ${{ jobs.bootjob.outputs.CERTIFICATEAUTHORITY }}
         CERTIFICATE:
           description: "Generated certificate"
-          value: ${{ jobs.gencert.outputs.CERTIFICATE }}
+          value: ${{ jobs.bootjob.outputs.CERTIFICATE }}
         PRIVATEKEY:
           description: "Private key"
-          value: ${{ jobs.gencert.outputs.PRIVATEKEY }}
+          value: ${{ jobs.bootjob.outputs.PRIVATEKEY }}
+        KUBE_CONFIG:
+          description: "KUBECONFIG in BASE64"
+          value: ${{ jobs.bootjob.outputs.KUBE_CONFIG }}
 permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
 
 jobs:
-  gencert:
+  bootjob:
     runs-on: ubuntu-latest
     # Map the job outputs to step outputs
     outputs:
       CERTIFICATEAUTHORITY: ${{ steps.bootstrap.outputs.CERTIFICATEAUTHORITY }}
       CERTIFICATE: ${{ steps.certificate.outputs.CERTIFICATE }}
       PRIVATEKEY: ${{ steps.certificate.outputs.PRIVATEKEY }}
+      KUBE_CONFIG: ${{ steps.kubeconfig.outputs.KUBE_CONFIG }}
     steps:
       - name: CA bootstrap
         id: bootstrap
@@ -55,6 +63,7 @@ jobs:
           echo 'CERTIFICATEAUTHORITY<<EOF' >> $GITHUB_OUTPUT
           cat ${HOME}/.step/certs/root_ca.crt >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
+          echo "CERTIFICATEAUTHORITY_BASE64=$(cat ${HOME}/.step/certs/root_ca.crt | base64)" >> $GITHUB_ENV
       - name: Issue certificate
         id: certificate
         run: |
@@ -76,4 +85,41 @@ jobs:
           echo 'PRIVATEKEY<<EOF' >> $GITHUB_OUTPUT
           cat github.key >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
-
+          echo "CERTIFICATE_BASE64=$(cat github.crt | base64)" >> $GITHUB_ENV
+          echo "PRIVATEKEY_BASE64=$(cat github.key | base64)" >> $GITHUB_ENV
+      - name: Generate KUBE_CONFIG
+        id: kubeconfig
+        run: |
+          KUBE_CONFIG_STRING=$(cat << EOF
+          apiVersion: v1
+          clusters:
+          - cluster:
+              certificate-authority-data: ${CERTIFICATEAUTHORITY_BASE64}
+              server: ${CLUSTER_URL}
+            name: default
+          contexts:
+          - context:
+              cluster: default
+              user: default
+            name: default
+          current-context: default
+          kind: Config
+          preferences: {}
+          users:
+          - name: default
+            user:
+              client-certificate-data: ${CERTIFICATE_BASE64}
+              client-key-data: ${PRIVATEKEY_BASE64}
+          EOF
+          )
+          echo 'KUBE_CONFIG<<EOF' >> $GITHUB_OUTPUT
+          echo "$KUBE_CONFIG_STRING" | base64 >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT          
+        env:
+          CLUSTER_URL: ${{ inputs.CLUSTER_URL }}
+          CERTIFICATEAUTHORITY_BASE64: $CERTIFICATEAUTHORITY_BASE64
+          CERTIFICATE_BASE64: $CERTIFICATE_BASE64
+          PRIVATEKEY_BASE64: $PRIVATEKEY_BASE64
+    
+  
+  
