@@ -27,7 +27,6 @@ on:
           description: Key for secret files/values. Required if secret files/values used in templates.
         KUBE_CONFIG:
           description: K8s config in base64
-          required: true
 
 concurrency:
   group: ${{ github.head_ref || github.ref_name }}
@@ -44,12 +43,15 @@ env:
 jobs:
   stepcacert:
     uses: ./.github/workflows/stepcacert.yaml
-  deployment:
+  kubeconf:
     needs: stepcacert
+    uses: ./.github/workflows/kubeconfig.yaml
+  deployment:
+    needs: kubeconf
     name: Deployment
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ needs.stepcacert.outputs.CERTIFICATE }}
+      - run: echo "${{ needs.kubeconf.outputs.KUBE_CONFIG }}"
       - name: Checkout code
         uses: actions/checkout@v3
         with:

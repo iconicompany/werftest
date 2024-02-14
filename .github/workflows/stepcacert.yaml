@@ -24,6 +24,9 @@ on:
           default: 1h
       # Map the workflow outputs to job outputs
       outputs:
+        CERTIFICATEAUTHORITY:
+          description: "Certificate authority"
+          value: ${{ jobs.gencert.outputs.CERTIFICATEAUTHORITY }}
         CERTIFICATE:
           description: "Generated certificate"
           value: ${{ jobs.gencert.outputs.CERTIFICATE }}
@@ -39,14 +42,20 @@ jobs:
     runs-on: ubuntu-latest
     # Map the job outputs to step outputs
     outputs:
+      CERTIFICATEAUTHORITY: ${{ steps.bootstrap.outputs.CERTIFICATEAUTHORITY }}
       CERTIFICATE: ${{ steps.certificate.outputs.CERTIFICATE }}
       PRIVATEKEY: ${{ steps.certificate.outputs.PRIVATEKEY }}
     steps:
       - name: CA bootstrap
+        id: bootstrap
         run: |
           curl -LO https://dl.smallstep.com/cli/docs-cli-install/latest/step-cli_amd64.deb
           sudo dpkg -i step-cli_amd64.deb
           step ca bootstrap --ca-url ${{ inputs.CA_URL}} --fingerprint ${{ inputs.CA_FINGERPRINT }}
+          echo 'CERTIFICATEAUTHORITY<<EOF' >> $GITHUB_OUTPUT
+          cat .step/certs/root_ca.crt >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
       - name: Issue certificate
         id: certificate
         run: |
