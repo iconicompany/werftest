@@ -9,7 +9,7 @@ on:
         CA_URL:
           description: Step CA URL, e.g. https://ca.iconicompany.com
           type: string
-          default: https://ca.iconicompany.com:7443
+          default: https://ca.iconicompany.com
         CA_FINGERPRINT:
           description: Root CA fingerprint
           type: string
