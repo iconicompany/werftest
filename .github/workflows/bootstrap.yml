@@ -26,6 +26,10 @@ on:
           description: Certificate lifetime 
           type: string
           default: 1h
+        CONTEXT:
+          description: KUBECONFIG context name 
+          type: string
+          default: default
       # Map the workflow outputs to job outputs
       outputs:
         CERTIFICATEAUTHORITY:
@@ -98,17 +102,17 @@ jobs:
           - cluster:
               certificate-authority-data: ${CERTIFICATEAUTHORITY_BASE64}
               server: ${CLUSTER_URL}
-            name: default
+            name: ${CONTEXT}
           contexts:
           - context:
-              cluster: default
-              user: default
-            name: default
-          current-context: default
+              cluster: ${CONTEXT}
+              user: ${CONTEXT}
+            name: ${CONTEXT}
+          current-context: ${CONTEXT}
           kind: Config
           preferences: {}
           users:
-          - name: default
+          - name: ${CONTEXT}
             user:
               client-certificate-data: ${CERTIFICATE_BASE64}
               client-key-data: ${PRIVATEKEY_BASE64}
@@ -122,6 +126,4 @@ jobs:
           CERTIFICATEAUTHORITY_BASE64: ${{ steps.bootstrap.outputs.CERTIFICATEAUTHORITY_BASE64 }}
           CERTIFICATE_BASE64: ${{ steps.certificate.outputs.CERTIFICATE_BASE64 }}
           PRIVATEKEY_BASE64: ${{ steps.certificate.outputs.PRIVATEKEY_BASE64 }}
-    
-  
-  
+          CONTEXT: ${{ inputs.CONTEXT }}
