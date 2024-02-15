@@ -7,7 +7,7 @@ on:
           type: string
           default: https://kube01.icncd.ru:6443
         CA_URL:
-          description: Step CA URL, e.g. https://ca.iconicompany.com:7443
+          description: Step CA URL, e.g. https://ca.iconicompany.com
           type: string
           default: https://ca.iconicompany.com:7443
         CA_FINGERPRINT:
