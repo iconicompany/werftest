@@ -7,6 +7,4 @@ jobs:
     uses: ./.github/workflows/deployment.yml
     secrets: inherit
     with:
-      #registry: registry.gitlab.com/${{ github.repository }}
-      #registry: ghcr.io/${{ github.repository }}
       setenv: env.DOMAIN=${{ github.head_ref || github.ref_name }}.${{ github.repository_owner }}.icncd.ru
