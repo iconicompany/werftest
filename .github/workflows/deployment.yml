@@ -66,6 +66,7 @@ jobs:
         id: bootstrap
         run: |
           curl -Ls https://github.com/iconicompany/werftest/raw/main/scripts/step-github.sh | bash -
+          cat $HOME/.kube/config
           echo 'KUBE_CONFIG<<EOF' >> $GITHUB_OUTPUT
           cat $HOME/.kube/config | base64 >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT

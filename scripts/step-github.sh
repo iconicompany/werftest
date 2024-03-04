@@ -45,5 +45,3 @@ user:
     client-key-data: ${PRIVATEKEY_BASE64}
 EOF
 
-cat $HOME/.kube/config
-
