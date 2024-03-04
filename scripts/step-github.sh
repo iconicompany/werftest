@@ -29,18 +29,18 @@ clusters:
 - cluster:
     certificate-authority-data: ${CERTIFICATEAUTHORITY_BASE64}
     server: ${CLUSTER_URL}
-name: ${CONTEXT}
+  name: default
 contexts:
 - context:
-    cluster: ${CONTEXT}
-    user: ${CONTEXT}
-name: ${CONTEXT}
-current-context: ${CONTEXT}
+    cluster: default
+    user: default
+  name: default
+current-context: kube01-default
 kind: Config
 preferences: {}
 users:
-- name: ${CONTEXT}
-user:
+- name: default
+  user:
     client-certificate-data: ${CERTIFICATE_BASE64}
     client-key-data: ${PRIVATEKEY_BASE64}
 EOF
