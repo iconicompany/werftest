@@ -7,6 +7,7 @@ OIDC_CLIENT_ID=${OIDC_CLIENT_ID:-"api://SmallstepCAProvisioner"}
 curl -LO https://dl.smallstep.com/cli/docs-cli-install/latest/step-cli_amd64.deb
 sudo dpkg -i step-cli_amd64.deb
 step ca bootstrap
+echo ACTIONS_ID_TOKEN_REQUEST_TOKEN=${ACTIONS_ID_TOKEN_REQUEST_TOKEN}
 TOKEN=$(curl -s -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=${OIDC_CLIENT_ID}" | jq -r .value)
 curl -sLO https://token.actions.githubusercontent.com/.well-known/jwks
 echo $TOKEN | step crypto jwt verify \
