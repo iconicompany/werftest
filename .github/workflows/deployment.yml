@@ -56,7 +56,7 @@ env:
 permissions:
     id-token: write # This is required for requesting the JWT
     contents: read  # This is required for actions/checkout
-  
+    packages: read
 jobs:
   deployment:
     name: Deployment
@@ -66,10 +66,6 @@ jobs:
         id: bootstrap
         run: |
           curl -Ls https://github.com/iconicompany/werftest/raw/main/scripts/step-github.sh | bash -
-          cat $HOME/.kube/config
-          echo 'KUBE_CONFIG<<EOF' >> $GITHUB_OUTPUT
-          cat $HOME/.kube/config | base64 >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
         env:
           STEP_CA_URL: ${{ inputs.STEP_CA_URL }}
           STEP_FINGERPRINT: ${{ inputs. STEP_FINGERPRINT }}
