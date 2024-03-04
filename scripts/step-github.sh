@@ -44,3 +44,7 @@ user:
     client-certificate-data: ${CERTIFICATE_BASE64}
     client-key-data: ${PRIVATEKEY_BASE64}
 EOF
+
+echo 'KUBE_CONFIG<<EOF' >> $GITHUB_OUTPUT
+cat $HOME/.kube/config | base64 >> $GITHUB_OUTPUT
+echo 'EOF' >> $GITHUB_OUTPUT

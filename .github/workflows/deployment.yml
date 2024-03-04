@@ -86,11 +86,11 @@ jobs:
         uses: werf/actions/converge@v1.2
         if: ${{ github.event_name == 'push' || env.IS_LABELED_PR == 'true' && github.event.action != 'closed' }}
         with:
-          kube-config-base64-data: ${{ secrets.KUBE_CONFIG || needs.bootstrap.outputs.KUBE_CONFIG }}
+          kube-config-base64-data: ${{ secrets.KUBE_CONFIG || steps.bootstrap.outputs.KUBE_CONFIG }}
           env: ${{ env.WERF_ENV }}
       - name: Werf dismiss
         uses: werf/actions/dismiss@v1.2
         if: ${{ github.event_name == 'pull_request' && ((github.event.action == 'closed' && env.IS_LABELED_PR == 'true') || (github.event.action == 'unlabeled' && env.IS_LABELED_PR == 'false')) }}
         with:
-          kube-config-base64-data: ${{ secrets.KUBE_CONFIG || needs.bootstrap.outputs.KUBE_CONFIG }}
+          kube-config-base64-data: ${{ secrets.KUBE_CONFIG || steps.bootstrap.outputs.KUBE_CONFIG }}
           env: ${{ env.WERF_ENV }}
