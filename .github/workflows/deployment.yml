@@ -53,6 +53,10 @@ env:
   WERF_SECRET_KEY: ${{ secrets.WERF_SECRET_KEY }}
   IS_LABELED_PR: ${{ github.event_name == 'pull_request' && contains( github.event.pull_request.labels.*.name, inputs.label ) }}
 
+permissions:
+    id-token: write # This is required for requesting the JWT
+    contents: read  # This is required for actions/checkout
+  
 jobs:
   deployment:
     name: Deployment
@@ -67,8 +71,6 @@ jobs:
           STEP_FINGERPRINT: ${{ inputs. STEP_FINGERPRINT }}
           CLUSTER_URL: ${{ inputs.CLUSTER_URL }}
           CONTEXT: ${{ inputs.CONTEXT }}
-          ACTIONS_ID_TOKEN_REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN
-          ACTIONS_ID_TOKEN_REQUEST_URL: $ACTIONS_ID_TOKEN_REQUEST_URL
       - name: Checkout code
         uses: actions/checkout@v4
         with:
